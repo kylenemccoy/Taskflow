@@ -541,7 +541,6 @@ function parseTask(text){
 }
 
 function render(){
-
 $("scope").innerHTML =
   tabs.map((tab,index) => `
     <button
@@ -554,9 +553,7 @@ $("scope").innerHTML =
         class="tab-delete"
         data-delete="${index}"
         title="Delete tab"
-      >
-        ×
-      </span>
+      >×</span>
     </button>
   `).join("");
 
