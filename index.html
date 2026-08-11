@@ -53,11 +53,14 @@ header{
 
 .switch{
   display:flex;
+  align-items:center;
+  gap:4px;
   background:#263244;
   border-radius:12px;
   padding:4px;
   margin-top:14px;
-  max-width:520px
+  max-width:520px;
+  overflow-x:auto
 }
 
 .switch button{
@@ -75,15 +78,19 @@ header{
   color:#111827
 }
 .add-tab{
-  margin-top:10px;
   border:0;
-  border-radius:9px;
-  padding:8px 14px;
-  background:#374151;
+  background:#263244;
   color:#fff;
-  font-size:18px;
+  padding:10px 14px;
+  border-radius:9px;
+  margin-top:14px;
+  font-size:20px;
   font-weight:700;
   cursor:pointer;
+}
+
+.add-tab:hover{
+  background:#374151;
 }
 
 .add-tab:hover{
@@ -281,13 +288,12 @@ footer{
 AI-style capture • School + Home • routines • calendar
 </div>
 
-<div class="switch" id="scope">
-</div>
+<div style="display:flex;align-items:center;gap:6px;">
+  <div class="switch" id="scope"></div>
 
-<button class="add-tab" id="addTabBtn">
-  ＋
-</button>
-
+  <button class="add-tab" id="addTabBtn">
+    ＋
+  </button>
 </div>
 
 </header>
@@ -409,37 +415,8 @@ let tasks=JSON.parse(
 
 let routines=
 JSON.parse(
-  localStorage.getItem(ROUTE)||"null"
-) || [
-
-{
- title:"Clean bathrooms",
- area:"home",
- days:["Tuesday"]
-},
-
-{
- title:"Vacuum",
- area:"home",
- days:["Wednesday"]
-},
-
-{
- title:"Review A+ mentoring hours",
- area:"school",
- days:["Friday"]
-},
-
-{
- title:"Check attendance",
- area:"school",
- days:[
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday"
- ]
+  localStorage.getItem(ROUTE)||"[]"
+);
 }
 
 ];
@@ -463,27 +440,13 @@ function save(){
 
 function areaFromText(t){
 
- t=t.toLowerCase();
+  if(scope !== "" && tabs[scope]){
+    return tabs[scope];
+  }
 
- let school=
- /school|a\+|a\ plus|student|teacher|attendance|mentoring|canvas|infinite campus|meeting|principal|class|grade|report/.test(t);
+  return "";
 
- let home=
- /home|house|bathroom|laundry|grocery|dog|family|dance|mom|dad|birthday|dinner|yard/.test(t);
-
- if(school&&!home)
-  return "school";
-
- if(home&&!school)
-  return "home";
-
- if(scope==="school")
-  return "school";
-
- if(scope==="home")
-  return "home";
-
- return "home";
+}
 
 }
 
@@ -575,39 +538,40 @@ function parseTask(text){
 
 function render(){
 
- document
- .querySelectorAll("#scope button")
- .forEach(
-  b=>b.classList.toggle(
-   "active",
-   b.dataset.scope===scope
-  )
- );
+  $("scope").innerHTML =
+    tabs.map((tab,index) => `
+      <button
+        data-scope="${index}"
+        class="${scope===index ? "active" : ""}"
+      >
+        ${esc(tab)}
+      </button>
+    `).join("");
 
- let visible=
- tasks
- .filter(
-  t=>scope==="all"||t.area===scope
- )
- .sort(
-  (a,b)=>
-   ({
-    high:0,
-    medium:1,
-    low:2
-   }[a.priority]-
-   {
-    high:0,
-    medium:1,
-    low:2
-   }[b.priority])
- );
+  let visible =
+    scope === ""
+      ? []
+      : tasks
+          .filter(t => t.area === tabs[scope])
+          .sort(
+            (a,b) =>
+              ({
+                high:0,
+                medium:1,
+                low:2
+              }[a.priority] -
+              {
+                high:0,
+                medium:1,
+                low:2
+              }[b.priority])
+          );
 
- $("tasks").innerHTML=
- visible.length?
+  $("tasks").innerHTML =
+    visible.length ?
 
- visible.map(
-  t=>`
+    visible.map(
+      t => `
 
 <div class="task ${t.done?"done":""}">
 
@@ -624,13 +588,9 @@ ${esc(t.title)}
 </div>
 
 <div class="meta">
-
-${t.area==="school"?"🏫 School":"🏠 Home"}
-
+${esc(t.area)}
 ${t.due?" • "+esc(t.due):""}
-
 ${t.recurring?" • recurring":""}
-
 </div>
 
 </div>
@@ -642,92 +602,55 @@ ${t.priority.toUpperCase()}
 </div>
 
 `
- ).join("")
+    ).join("")
 
-:
+    :
 
-'<div class="empty">No tasks here yet. Type or speak one above.</div>';
+    '<div class="empty">No tasks here yet. Type or speak one above.</div>';
 
- let today=
- [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
- ][new Date().getDay()];
+  $("routines").innerHTML =
+    '<div class="empty">Create recurring tasks from your selected tab.</div>';
 
- let rs=
- routines.filter(
-  r=>
-   (scope==="all"||r.area===scope)
-   &&
-   r.days.includes(today)
- );
+  let best =
+    visible.find(
+      t => !t.done
+    );
 
- $("routines").innerHTML=
- rs.length?
+  $("recommendation").innerHTML =
 
- rs.map(
-  r=>`
+    best ?
 
-<div class="routine">
+    `Based on priority, I’d do:
 
-<div>
+    <br><br>
 
-<b>
-${esc(r.title)}
-</b>
+    <b>
+    ${esc(best.title)}
+    </b>
 
-<div class="small">
-${r.area==="school"?"School":"Home"} • Today
-</div>
+    <br>
 
-</div>
+    <span class="small">
 
-<span>🔁</span>
+    ${best.priority.toUpperCase()}
 
-</div>
+    ${best.due?" • "+esc(best.due):""}
 
-`
- ).join("")
+    </span>`
 
-:
+    :
 
-'<div class="empty">No routine scheduled for today.</div>';
+    "You're caught up! 🎉";
 
- let best=
- visible.find(
-  t=>!t.done
- );
-
- $("recommendation").innerHTML=
-
- best?
-
- `Based on priority, I’d do:
-
-<br><br>
-
-<b>
-${esc(best.title)}
-</b>
-
-<br>
-
-<span class="small">
-
-${best.priority.toUpperCase()} priority
-
-${best.due?" • "+esc(best.due):""}
-
-</span>`
-
-:
-
-"You're caught up! 🎉";
+  document
+    .querySelectorAll("#scope button")
+    .forEach(
+      b =>
+      b.onclick = () => {
+        scope = Number(b.dataset.scope);
+        render();
+      }
+    );
 
 }
 
@@ -814,6 +737,32 @@ function esc(s){
 }
 
 $("addBtn").onclick=add;
+  $("addTabBtn").onclick=()=>{
+
+  if(tabs.length>=5){
+    alert("You can have up to 5 tabs.");
+    return;
+  }
+
+  let name=prompt("What would you like to name this tab?");
+
+  if(!name)
+    return;
+
+  name=name.trim();
+
+  if(!name)
+    return;
+
+  tabs.push(name);
+
+  scope=tabs.length-1;
+
+  saveTabs();
+
+  render();
+
+};
 
 $("taskInput")
 .addEventListener(
