@@ -1,4 +1,3 @@
-```javascript
 const STORAGE_KEY = "life-organizer-v1";
 
 const defaultState = {
