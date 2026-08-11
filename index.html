@@ -87,7 +87,17 @@ header{
   font-weight:700;
   cursor:pointer;
 }
+.tab-delete{
+  margin-left:6px;
+  font-size:14px;
+  font-weight:900;
+  opacity:.65;
+  cursor:pointer;
+}
 
+.tab-delete:hover{
+  opacity:1;
+}
 .add-tab:hover{
   background:#374151;
 }
@@ -532,15 +542,23 @@ function parseTask(text){
 
 function render(){
 
-  $("scope").innerHTML =
-    tabs.map((tab,index) => `
-      <button
-        data-scope="${index}"
-        class="${scope===index ? "active" : ""}"
+$("scope").innerHTML =
+  tabs.map((tab,index) => `
+    <button
+      data-scope="${index}"
+      class="${scope===index ? "active" : ""}"
+      data-tab="${index}"
+    >
+      ${esc(tab)}
+      <span
+        class="tab-delete"
+        data-delete="${index}"
+        title="Delete tab"
       >
-        ${esc(tab)}
-      </button>
-    `).join("");
+        ×
+      </span>
+    </button>
+  `).join("");
 
   let visible =
     scope === ""
@@ -647,7 +665,45 @@ ${t.priority.toUpperCase()}
     );
 
 }
+function deleteTab(index){
 
+  let tabName = tabs[index];
+
+  if(!confirm(
+    `Delete "${tabName}"?\n\nThe tasks in this tab will also be deleted.`
+  )){
+    return;
+  }
+
+  tasks = tasks.filter(
+    t => t.area !== tabName
+  );
+
+  routines = routines.filter(
+    r => r.area !== tabName
+  );
+
+  tabs.splice(index,1);
+
+  if(tabs.length === 0){
+
+    scope = "";
+
+  }else if(scope === index){
+
+    scope = Math.min(index,tabs.length-1);
+
+  }else if(scope > index){
+
+    scope--;
+
+  }
+
+  saveTabs();
+  save();
+  render();
+
+}
 function toggle(id){
 
  let t=
@@ -768,15 +824,33 @@ $("taskInput")
 );
 
 document
-.querySelectorAll("#scope button")
-.forEach(
- b=>
- b.onclick=()=>{
-  scope=b.dataset.scope;
-  render();
- }
-);
+  .querySelectorAll("#scope button")
+  .forEach(b => {
 
+    b.onclick = (e) => {
+
+      if(e.target.classList.contains("tab-delete")){
+
+        e.stopPropagation();
+
+        deleteTab(
+          Number(e.target.dataset.delete)
+        );
+
+        return;
+
+      }
+
+      scope =
+        Number(
+          b.dataset.scope
+        );
+
+      render();
+
+    };
+
+  });
 $("micBtn").onclick=()=>{
 
  const SR=
