@@ -386,8 +386,22 @@ Voice input uses your browser's speech recognition when available.
 
 const KEY="taskflow_tasks_v1";
 const ROUTE="taskflow_routines_v1";
+const TAB_KEY="taskflow_tabs_v1";
 
-let scope="all";
+let tabs=JSON.parse(
+  localStorage.getItem(TAB_KEY)||"[]"
+);
+
+let scope="";
+
+function saveTabs(){
+
+  localStorage.setItem(
+    TAB_KEY,
+    JSON.stringify(tabs)
+  );
+
+}
 
 let tasks=JSON.parse(
   localStorage.getItem(KEY)||"[]"
