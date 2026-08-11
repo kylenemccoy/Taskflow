@@ -87,6 +87,33 @@ header{
   font-weight:700;
   cursor:pointer;
 }
+.tab-menu{
+  display:none;
+  position:fixed;
+  z-index:100;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow:0 8px 30px #10182825;
+  padding:6px;
+  min-width:150px;
+}
+
+.tab-menu button{
+  display:block;
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:left;
+  padding:10px 12px;
+  border-radius:8px;
+  font-weight:650;
+  cursor:pointer;
+}
+
+.tab-menu button:hover{
+  background:#f2f4f7;
+}
 .tab-delete{
   margin-left:6px;
   font-size:14px;
@@ -299,6 +326,11 @@ AI-style capture • School + Home • routines • calendar
 
 <div style="display:flex;align-items:center;gap:6px;">
   <div class="switch" id="scope"></div>
+
+<div id="tabMenu" class="tab-menu">
+  <button id="renameTabBtn">✏️ Rename</button>
+  <button id="deleteTabBtn">🗑️ Delete</button>
+</div>
 
   <button class="add-tab" id="addTabBtn">
     ＋
@@ -545,15 +577,10 @@ $("scope").innerHTML =
   tabs.map((tab,index) => `
     <button
       data-scope="${index}"
-      class="${scope===index ? "active" : ""}"
       data-tab="${index}"
+      class="${scope===index ? "active" : ""}"
     >
       ${esc(tab)}
-      <span
-        class="tab-delete"
-        data-delete="${index}"
-        title="Delete tab"
-      >×</span>
     </button>
   `).join("");
 
@@ -650,16 +677,64 @@ ${t.priority.toUpperCase()}
     :
 
     "You're caught up! 🎉";
+}
+document
+.querySelectorAll("#scope button")
+.forEach(b => {
 
-  document
-    .querySelectorAll("#scope button")
-    .forEach(
-      b =>
-      b.onclick = () => {
-        scope = Number(b.dataset.scope);
-        render();
-      }
+  let pressTimer = null;
+
+  b.onclick = () => {
+
+    scope =
+      Number(b.dataset.scope);
+
+    render();
+
+  };
+
+  b.oncontextmenu = e => {
+
+    e.preventDefault();
+
+    showTabMenu(
+      Number(b.dataset.scope),
+      e.clientX,
+      e.clientY
     );
+
+  };
+
+  b.ontouchstart = e => {
+
+    pressTimer = setTimeout(() => {
+
+      const touch =
+        e.touches[0];
+
+      showTabMenu(
+        Number(b.dataset.scope),
+        touch.clientX,
+        touch.clientY
+      );
+
+    }, 600);
+
+  };
+
+  b.ontouchend = () => {
+
+    clearTimeout(pressTimer);
+
+  };
+
+  b.ontouchmove = () => {
+
+    clearTimeout(pressTimer);
+
+  };
+
+});
 
 }
 function deleteTab(index){
@@ -701,6 +776,170 @@ function deleteTab(index){
   render();
 
 }
+let menuTabIndex = null;
+
+function showTabMenu(index,x,y){
+
+  menuTabIndex = index;
+
+  const menu = $("tabMenu");
+
+  menu.style.left = x + "px";
+  menu.style.top = y + "px";
+  menu.style.display = "block";
+
+}
+
+function hideTabMenu(){
+
+  $("tabMenu").style.display = "none";
+
+  menuTabIndex = null;
+
+}
+
+function renameTab(){
+
+  if(menuTabIndex === null)
+    return;
+
+  let oldName =
+    tabs[menuTabIndex];
+
+  let newName =
+    prompt(
+      "Rename this tab:",
+      oldName
+    );
+
+  if(!newName)
+    return;
+
+  newName = newName.trim();
+
+  if(!newName)
+    return;
+
+  if(
+    tabs.some(
+      (t,i)=>
+        i !== menuTabIndex &&
+        t.toLowerCase() === newName.toLowerCase()
+    )
+  ){
+
+    alert("You already have a tab with that name.");
+
+    return;
+
+  }
+
+  let oldTab = tabs[menuTabIndex];
+
+  tabs[menuTabIndex] = newName;
+
+  tasks.forEach(
+    t=>{
+      if(t.area === oldTab)
+        t.area = newName;
+    }
+  );
+
+  routines.forEach(
+    r=>{
+      if(r.area === oldTab)
+        r.area = newName;
+    }
+  );
+
+  saveTabs();
+  save();
+
+  hideTabMenu();
+
+  render();
+
+}
+
+function deleteTab(){
+
+  if(menuTabIndex === null)
+    return;
+
+  let index =
+    menuTabIndex;
+
+  let tabName =
+    tabs[index];
+
+  let confirmed =
+    confirm(
+      `Delete "${tabName}"?\n\nTasks in this tab will also be deleted.`
+    );
+
+  if(!confirmed)
+    return;
+
+  tasks =
+    tasks.filter(
+      t=>t.area !== tabName
+    );
+
+  routines =
+    routines.filter(
+      r=>r.area !== tabName
+    );
+
+  tabs.splice(index,1);
+
+  if(tabs.length === 0){
+
+    scope = "";
+
+  }else if(scope === index){
+
+    scope =
+      Math.min(
+        index,
+        tabs.length-1
+      );
+
+  }else if(scope > index){
+
+    scope--;
+
+  }
+
+  saveTabs();
+  save();
+
+  hideTabMenu();
+
+  render();
+
+}
+
+$("renameTabBtn").onclick =
+  renameTab;
+
+$("deleteTabBtn").onclick =
+  deleteTab;
+
+document.addEventListener(
+  "click",
+  e=>{
+
+    if(
+      !e.target.closest(".tab-menu") &&
+      !e.target.closest("#scope button")
+    ){
+
+      hideTabMenu();
+
+    }
+
+  }
+);
 function toggle(id){
 
  let t=
