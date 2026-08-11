@@ -1,91 +1,309 @@
-<!doctype html>
+```html
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#1f2937">
-<title>TaskFlow</title>
-<link rel="manifest" href="manifest.json">
-<style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e4e7ec;--accent:#4f46e5;--high:#dc2626;--med:#d97706;--low:#16a34a}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
-header{background:#111827;color:#fff;padding:18px 22px;position:sticky;top:0;z-index:5}
-.brand{font-size:22px;font-weight:800}.sub{font-size:12px;opacity:.7}
-.switch{display:flex;background:#263244;border-radius:12px;padding:4px;margin-top:14px;max-width:520px}.switch button{flex:1;border:0;background:transparent;color:#cbd5e1;padding:10px;border-radius:9px;font-weight:700}.switch button.active{background:#fff;color:#111827}
-main{max-width:900px;margin:0 auto;padding:20px}
-.capture{display:flex;gap:8px;background:var(--card);padding:10px;border-radius:16px;box-shadow:0 3px 15px #10182812}.capture input{flex:1;border:0;outline:0;font-size:16px;padding:10px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}.add{background:var(--accent);color:#fff}.mic{background:#111827;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}@media(max-width:700px){.grid{grid-template-columns:1fr}.capture{flex-wrap:wrap}.capture input{min-width:100%}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}.card h2{font-size:16px;margin:0 0 12px}.empty{color:var(--muted);font-size:14px;padding:10px 0}
-.task{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}.task:first-child{border-top:0}.task input{margin-top:4px}.task-main{flex:1}.task-title{font-weight:650}.done .task-title{text-decoration:line-through;color:var(--muted)}.meta{font-size:12px;color:var(--muted);margin-top:3px}.pill{font-size:11px;font-weight:800;padding:4px 7px;border-radius:20px;white-space:nowrap}.high{background:#fee2e2;color:var(--high)}.medium{background:#fef3c7;color:var(--med)}.low{background:#dcfce7;color:var(--low)}
-.routine{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.routine:first-child{border-top:0}.small{font-size:12px;color:var(--muted)}
-.calendar{background:#eef2ff;border-radius:12px;padding:10px;margin-top:8px}.calendar b{font-size:13px}.calendar div{font-size:12px;color:#475467;margin-top:3px}
-footer{max-width:900px;margin:0 auto;padding:5px 20px 30px;color:var(--muted);font-size:12px}
-</style>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="A simple, privacy-first organizer for tasks, lists, calendars, and routines."
+  >
+
+  <meta name="theme-color" content="#172033">
+
+  <title>Life Organizer</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<header>
-  <div class="brand">TaskFlow</div><div class="sub">AI-style capture • School + Home • routines • calendar</div>
-  <div class="switch" id="scope">
-    <button data-scope="all" class="active">ALL</button><button data-scope="school">🏫 SCHOOL</button><button data-scope="home">🏠 HOME</button>
-  </div>
-</header>
-<main>
-  <div class="capture">
-    <input id="taskInput" placeholder='Try: "Clean bathrooms every Tuesday" or "Call Sarah tomorrow"'>
-    <button class="btn mic" id="micBtn">🎤</button><button class="btn add" id="addBtn">Add</button>
-  </div>
-  <div class="grid">
-    <section class="card"><h2>🧠 Priority / Today</h2><div id="tasks"></div></section>
-    <section class="card"><h2>🔁 Weekly Routines</h2><div id="routines"></div></section>
-    <section class="card"><h2>📅 Google Calendar</h2>
-      <div class="small">Prototype placeholder — connect your Google account in the production version.</div>
-      <div class="calendar"><b>10:00 AM • Staff Meeting</b><div>Example school calendar event</div></div>
-      <div class="calendar"><b>4:00 PM • Family / Personal</b><div>Example home calendar event</div></div>
+
+  <!-- TOP HEADER -->
+  <header class="topbar">
+
+    <div>
+      <div class="eyebrow">VERSION 1</div>
+      <h1>Life Organizer</h1>
+    </div>
+
+    <button
+      id="settingsBtn"
+      class="icon-btn"
+      aria-label="Settings"
+    >
+      ⚙️
+    </button>
+
+  </header>
+
+
+  <!-- MAIN APP -->
+  <main>
+
+    <!-- CUSTOM SPACES -->
+    <section
+      class="spaces"
+      id="spaces"
+    ></section>
+
+
+    <!-- QUICK CAPTURE -->
+    <section class="capture card">
+
+      <div class="capture-head">
+
+        <div>
+          <h2>Get it out of your head</h2>
+
+          <p>
+            Type or speak what you need to remember.
+          </p>
+        </div>
+
+        <button
+          id="voiceBtn"
+          class="voice-btn"
+          title="Speak a task"
+          aria-label="Speak a task"
+        >
+          🎤
+        </button>
+
+      </div>
+
+
+      <textarea
+        id="captureInput"
+        rows="3"
+        placeholder="Example: I need to finish the mentoring spreadsheet by Friday..."
+      ></textarea>
+
+
+      <div class="capture-actions">
+
+        <button
+          id="addTaskBtn"
+          class="primary"
+        >
+          Add Task
+        </button>
+
+
+        <button
+          id="shareTextBtn"
+          class="secondary"
+        >
+          💬 From Text
+        </button>
+
+      </div>
+
+
+      <div
+        id="captureStatus"
+        class="status"
+        aria-live="polite"
+      ></div>
+
     </section>
-    <section class="card"><h2>✨ What should I do?</h2><div id="recommendation" class="empty"></div></section>
-  </div>
-</main>
-<footer>Prototype data is saved in this browser. Voice input uses your browser's speech recognition when available.</footer>
-<script>
-const KEY="taskflow_tasks_v1", ROUTE="taskflow_routines_v1";
-let scope="all", tasks=JSON.parse(localStorage.getItem(KEY)||"[]");
-let routines=JSON.parse(localStorage.getItem(ROUTE)||"null") || [
- {title:"Clean bathrooms",area:"home",days:["Tuesday"]},
- {title:"Vacuum",area:"home",days:["Wednesday"]},
- {title:"Review A+ mentoring hours",area:"school",days:["Friday"]},
- {title:"Check attendance",area:"school",days:["Monday","Tuesday","Wednesday","Thursday","Friday"]}
-];
-const $=id=>document.getElementById(id);
-function save(){localStorage.setItem(KEY,JSON.stringify(tasks));localStorage.setItem(ROUTE,JSON.stringify(routines))}
-function areaFromText(t){t=t.toLowerCase();let school=/school|a\+|a\ plus|student|teacher|attendance|mentoring|canvas|infinite campus|meeting|principal|class|grade|report/.test(t);let home=/home|house|bathroom|laundry|grocery|dog|family|dance|mom|dad|birthday|dinner|yard/.test(t);return school&&!home?"school":home&&!school?"home":scope==="school"?"school":scope==="home"?"home":"home"}
-function priority(t, dateText){let s=t.toLowerCase(), score=0;if(/today|now|asap|urgent|deadline|due/.test(s))score+=5;if(/tomorrow/.test(s))score+=4;if(/important|must|need to/.test(s))score+=2;if(/call|email|submit|pay|schedule|finish/.test(s))score+=1;if(dateText)score+=2;return score>=5?"high":score>=2?"medium":"low"}
-function parseTask(text){
- let t=text.trim();if(!t)return null;
- let recurring=/every (monday|tuesday|wednesday|thursday|friday|saturday|sunday)|each (monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i.exec(t);
- let due=/\b(today|tomorrow|friday|monday|tuesday|wednesday|thursday|saturday|sunday)\b/i.exec(t);
- let title=t.replace(/\b(every|each)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/ig,"").replace(/\b(today|tomorrow)\b/ig,"").replace(/\s+/g," ").trim();
- return {title:title.replace(/[.!?]+$/,""),area:areaFromText(t),priority:priority(t,due),due:due?due[1]:"",recurring:!!recurring,done:false,id:Date.now()}
-}
-function render(){
- document.querySelectorAll("#scope button").forEach(b=>b.classList.toggle("active",b.dataset.scope===scope));
- let visible=tasks.filter(t=>scope==="all"||t.area===scope).sort((a,b)=>({high:0,medium:1,low:2}[a.priority]-({high:0,medium:1,low:2}[b.priority])));
- $("tasks").innerHTML=visible.length?visible.map(t=>`<div class="task ${t.done?"done":""}"><input type="checkbox" ${t.done?"checked":""} onchange="toggle(${t.id})"><div class="task-main"><div class="task-title">${esc(t.title)}</div><div class="meta">${t.area==="school"?"🏫 School":"🏠 Home"}${t.due?" • "+esc(t.due):""}${t.recurring?" • recurring":""}</div></div><span class="pill ${t.priority}">${t.priority.toUpperCase()}</span></div>`).join(""):'<div class="empty">No tasks here yet. Type or speak one above.</div>';
- let today=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
- let rs=routines.filter(r=>(scope==="all"||r.area===scope)&&r.days.includes(today));
- $("routines").innerHTML=rs.length?rs.map(r=>`<div class="routine"><div><b>${esc(r.title)}</b><div class="small">${r.area==="school"?"School":"Home"} • Today</div></div><span>🔁</span></div>`).join(""):'<div class="empty">No routine scheduled for today.</div>';
- let best=visible.find(t=>!t.done);$("recommendation").innerHTML=best?`Based on priority, I’d do:<br><br><b>${esc(best.title)}</b><br><span class="small">${best.priority.toUpperCase()} priority${best.due?" • "+esc(best.due):""}</span>`:"You're caught up! 🎉";
-}
-function toggle(id){let t=tasks.find(x=>x.id===id);if(t)t.done=!t.done;save();render()}
-function add(){let t=parseTask($("taskInput").value);if(!t)return;if(t.recurring){let m=t.title.match(/(.+)/);let day=/every\s+(\w+)|each\s+(\w+)/i.exec($("taskInput").value);routines.push({title:t.title,area:t.area,days:[day?(day[1]||day[2]).replace(/^./,x=>x.toUpperCase()):"Monday"]});}else tasks.push(t);$("taskInput").value="";save();render()}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-$("addBtn").onclick=add;$("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")add()});
-document.querySelectorAll("#scope button").forEach(b=>b.onclick=()=>{scope=b.dataset.scope;render()});
-$("micBtn").onclick=()=>{
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){alert("Voice input isn't supported by this browser. Try Chrome on your phone or computer.");return}
- const r=new SR();r.lang="en-US";r.interimResults=false;r.onresult=e=>{$("taskInput").value=e.results[0][0].transcript;add()};r.onerror=()=>alert("I couldn't hear that. Please try again.");r.start();
-};
-render();
-</script>
+
+
+    <!-- SPACE HEADER -->
+    <section class="toolbar">
+
+      <div>
+
+        <h2 id="spaceTitle">
+          Home
+        </h2>
+
+        <p id="spaceSubtitle">
+          Your tasks and lists
+        </p>
+
+      </div>
+
+
+      <button
+        id="newListBtn"
+        class="secondary"
+      >
+        ＋ New List
+      </button>
+
+    </section>
+
+
+    <!-- TASK GROUPS -->
+    <section
+      id="groups"
+    ></section>
+
+  </main>
+
+
+  <!-- SETTINGS WINDOW -->
+  <dialog id="settingsDialog">
+
+    <form
+      method="dialog"
+      id="settingsForm"
+    >
+
+      <div class="dialog-head">
+
+        <h2>Settings</h2>
+
+        <button
+          value="cancel"
+          class="icon-btn"
+          aria-label="Close settings"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <h3>Your Spaces</h3>
+
+      <p class="small">
+        Create spaces such as Home, School, Work,
+        Family, or anything else that fits your life.
+      </p>
+
+
+      <div id="spaceSettings"></div>
+
+
+      <button
+        type="button"
+        id="addSpaceBtn"
+        class="secondary full"
+      >
+        ＋ Add Space
+      </button>
+
+
+      <hr>
+
+
+      <!-- NOTIFICATIONS -->
+      <h3>Notifications</h3>
+
+      <label class="check">
+
+        <input
+          type="checkbox"
+          id="notifyHigh"
+        >
+
+        High-priority reminders
+
+      </label>
+
+
+      <label class="check">
+
+        <input
+          type="checkbox"
+          id="notifyRemaining"
+        >
+
+        Remind me about remaining tasks
+
+      </label>
+
+
+      <hr>
+
+
+      <!-- PRIVACY -->
+      <h3>Privacy</h3>
+
+      <p class="small">
+
+        Life Organizer is designed around
+        data minimization. Your tasks are stored
+        locally in this prototype. Information
+        submitted for temporary processing should
+        not be retained unnecessarily.
+
+      </p>
+
+
+      <button
+        type="button"
+        id="clearDataBtn"
+        class="danger full"
+      >
+        Delete All Local App Data
+      </button>
+
+    </form>
+
+  </dialog>
+
+
+  <!-- NEW LIST WINDOW -->
+  <dialog id="listDialog">
+
+    <form
+      method="dialog"
+      id="listForm"
+    >
+
+      <div class="dialog-head">
+
+        <h2>Create a List</h2>
+
+        <button
+          value="cancel"
+          class="icon-btn"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <p class="small">
+        Create lists such as Shopping,
+        Materials, Reading, Projects, or anything
+        else you need.
+      </p>
+
+
+      <input
+        id="listName"
+        type="text"
+        placeholder="Shopping, Materials, Reading..."
+        required
+      >
+
+
+      <button
+        class="primary full"
+        value="default"
+      >
+        Create List
+      </button>
+
+    </form>
+
+  </dialog>
+
+
+  <!-- APP JAVASCRIPT -->
+  <script src="app.js"></script>
+
 </body>
 </html>
+```
