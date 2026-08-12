@@ -114,17 +114,7 @@ header{
 .tab-menu button:hover{
   background:#f2f4f7;
 }
-.tab-delete{
-  margin-left:6px;
-  font-size:14px;
-  font-weight:900;
-  opacity:.65;
-  cursor:pointer;
-}
 
-.tab-delete:hover{
-  opacity:1;
-}
 .add-tab:hover{
   background:#374151;
 }
@@ -1065,17 +1055,6 @@ document
 
     b.onclick = (e) => {
 
-      if(e.target.classList.contains("tab-delete")){
-
-        e.stopPropagation();
-
-        deleteTab(
-          Number(e.target.dataset.delete)
-        );
-
-        return;
-
-      }
 
       scope =
         Number(
