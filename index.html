@@ -564,21 +564,31 @@ function parseTask(text){
 
 function render(){
 $("scope").innerHTML =
+  `<button
+    data-scope="all"
+    data-tab="all"
+    class="${scope === "all" ? "active" : ""}"
+  >
+    ALL
+  </button>` +
+
   tabs.map((tab,index) => `
     <button
       data-scope="${index}"
       data-tab="${index}"
-      class="${scope===index ? "active" : ""}"
+      class="${scope === index ? "active" : ""}"
     >
       ${esc(tab)}
     </button>
   `).join("");
 
-  let visible =
-    scope === ""
+let visible =
+  scope === "all"
+    ? [...tasks]
+    : scope === ""
       ? []
       : tasks
-          .filter(t => t.area === tabs[scope])
+          .filter(t => t.area === tabs[scope]);
           .sort(
             (a,b) =>
               ({
@@ -671,15 +681,16 @@ document
 .querySelectorAll("#scope button")
 .forEach(b => {
 
-  b.addEventListener("click", function(){
+b.addEventListener("click", function(){
 
-    scope = Number(
-      this.dataset.scope
-    );
+  scope =
+    this.dataset.scope === "all"
+      ? "all"
+      : Number(this.dataset.scope);
 
-    render();
+  render();
 
-  });
+});
 
   b.addEventListener("contextmenu", e => {
 
