@@ -672,16 +672,58 @@ document
 .querySelectorAll("#scope button")
 .forEach(b => {
 
-  let pressTimer = null;
+  b.addEventListener("click", function(){
 
-  b.onclick = () => {
-
-    scope =
-      Number(b.dataset.scope);
+    scope = Number(
+      this.dataset.scope
+    );
 
     render();
 
-  };
+  });
+
+});
+  b.addEventListener("contextmenu", e => {
+
+    e.preventDefault();
+
+    showTabMenu(
+      Number(b.dataset.scope),
+      e.clientX,
+      e.clientY
+    );
+
+  });
+
+  b.addEventListener("touchstart", e => {
+
+    pressTimer = setTimeout(() => {
+
+      const touch = e.touches[0];
+
+      showTabMenu(
+        Number(b.dataset.scope),
+        touch.clientX,
+        touch.clientY
+      );
+
+    }, 600);
+
+  });
+
+  b.addEventListener("touchend", () => {
+
+    clearTimeout(pressTimer);
+
+  });
+
+  b.addEventListener("touchmove", () => {
+
+    clearTimeout(pressTimer);
+
+  });
+
+});
 
   b.oncontextmenu = e => {
 
@@ -1080,23 +1122,6 @@ $("taskInput")
  }
 );
 
-document
-  .querySelectorAll("#scope button")
-  .forEach(b => {
-
-    b.onclick = (e) => {
-
-
-      scope =
-        Number(
-          b.dataset.scope
-        );
-
-      render();
-
-    };
-
-  });
 $("micBtn").onclick=()=>{
 
  const SR=
