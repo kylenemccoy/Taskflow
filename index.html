@@ -563,35 +563,58 @@ function parseTask(text){
 }
 
 function render(){
-$("scope").innerHTML =
-  tabs.map((tab,index) => `
-    <button
-      data-scope="${index}"
-      data-tab="${index}"
-      class="${scope===index ? "active" : ""}"
+
+  $("scope").innerHTML =
+
+    `<button
+      data-scope="all"
+      data-tab="all"
+      class="${scope === "all" ? "active" : ""}"
     >
-      ${esc(tab)}
-    </button>
-  `).join("");
+      ALL
+    </button>` +
+
+    tabs.map((tab,index) => `
+      <button
+        data-scope="${index}"
+        data-tab="${index}"
+        class="${scope === index ? "active" : ""}"
+      >
+        ${esc(tab)}
+      </button>
+    `).join("");
+
 
   let visible =
-    scope === ""
-      ? []
-      : tasks
-          .filter(t => t.area === tabs[scope])
-          .sort(
-            (a,b) =>
-              ({
-                high:0,
-                medium:1,
-                low:2
-              }[a.priority] -
-              {
-                high:0,
-                medium:1,
-                low:2
-              }[b.priority])
-          );
+    scope === "all"
+
+      ? tasks
+
+      : scope === ""
+
+        ? []
+
+        : tasks
+            .filter(
+              t => t.area === tabs[scope]
+            );
+
+
+  visible.sort(
+    (a,b) =>
+      ({
+        high:0,
+        medium:1,
+        low:2
+      }[a.priority] -
+      {
+        high:0,
+        medium:1,
+        low:2
+      }[b.priority]
+    )
+  );
+
 
   $("tasks").innerHTML =
     visible.length ?
@@ -634,13 +657,16 @@ ${t.priority.toUpperCase()}
 
     '<div class="empty">No tasks here yet. Type or speak one above.</div>';
 
+
   $("routines").innerHTML =
     '<div class="empty">Create recurring tasks from your selected tab.</div>';
+
 
   let best =
     visible.find(
       t => !t.done
     );
+
 
   $("recommendation").innerHTML =
 
@@ -667,61 +693,71 @@ ${t.priority.toUpperCase()}
     :
 
     "You're caught up! 🎉";
+
+
 document
-.querySelectorAll("#scope button")
-.forEach(b => {
+  .querySelectorAll('#scope button:not([data-scope="all"])')
+    .forEach(b => {
 
-  b.addEventListener("click", function(){
+      b.addEventListener("click", function(){
 
-    scope = Number(
-      this.dataset.scope
-    );
+        scope =
+          this.dataset.scope === "all"
+            ? "all"
+            : Number(
+                this.dataset.scope
+              );
 
-    render();
+        render();
 
-  });
+      });
 
-  b.addEventListener("contextmenu", e => {
 
-    e.preventDefault();
+      b.addEventListener("contextmenu", e => {
 
-    showTabMenu(
-      Number(b.dataset.scope),
-      e.clientX,
-      e.clientY
-    );
+        e.preventDefault();
 
-  });
+        showTabMenu(
+          Number(b.dataset.scope),
+          e.clientX,
+          e.clientY
+        );
 
-  b.addEventListener("touchstart", e => {
+      });
 
-    pressTimer = setTimeout(() => {
 
-      const touch = e.touches[0];
+      b.addEventListener("touchstart", e => {
 
-      showTabMenu(
-        Number(b.dataset.scope),
-        touch.clientX,
-        touch.clientY
-      );
+        pressTimer = setTimeout(() => {
 
-    }, 600);
+          const touch = e.touches[0];
 
-  });
+          showTabMenu(
+            Number(b.dataset.scope),
+            touch.clientX,
+            touch.clientY
+          );
 
-  b.addEventListener("touchend", () => {
+        }, 600);
 
-    clearTimeout(pressTimer);
+      });
 
-  });
 
-  b.addEventListener("touchmove", () => {
+      b.addEventListener("touchend", () => {
 
-    clearTimeout(pressTimer);
+        clearTimeout(pressTimer);
 
-  });
+      });
 
-});
+
+      b.addEventListener("touchmove", () => {
+
+        clearTimeout(pressTimer);
+
+      });
+
+    });
+
 }
 
 function deleteTab(index){
