@@ -726,7 +726,6 @@ document
 
 });
 
-}
 function deleteTab(index){
 
   let tabName = tabs[index];
@@ -1013,6 +1012,38 @@ function esc(s){
 }
 
 $("addBtn").onclick=add;
+  $("addTabBtn").onclick=()=>{
+
+  if(tabs.length>=5){
+
+    alert("You can have up to 5 tabs.");
+
+    return;
+
+  }
+
+  let name=
+    prompt(
+      "What would you like to name this tab?"
+    );
+
+  if(!name)
+    return;
+
+  name=name.trim();
+
+  if(!name)
+    return;
+
+  tabs.push(name);
+
+  scope=tabs.length-1;
+
+  saveTabs();
+
+  render();
+
+};
   $("addTabBtn").onclick=()=>{
 
   if(tabs.length>=5){
