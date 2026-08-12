@@ -202,7 +202,7 @@ main{
   padding:10px 0
 }
 
-.task{
+.{
   display:flex;
   align-items:flex-start;
   gap:10px;
@@ -619,8 +619,8 @@ function render(){
   $("tasks").innerHTML =
     visible.length ?
 
-    visible.map(
-      t => `
+visible.map(
+  t => `
 
 <div class="task ${t.done?"done":""}">
 
@@ -648,10 +648,18 @@ ${t.recurring?" • recurring":""}
 ${t.priority.toUpperCase()}
 </span>
 
+<button
+ type="button"
+ onclick="editTask(${t.id})"
+ title="Edit task"
+>
+✏️
+</button>
+
 </div>
 
 `
-    ).join("")
+).join("")
 
     :
 
@@ -1022,6 +1030,69 @@ function add(){
   tasks.push(t);
 
  }
+  function editTask(id){
+
+  let task =
+    tasks.find(
+      t => t.id === id
+    );
+
+  if(!task)
+    return;
+
+  let newTitle =
+    prompt(
+      "Edit task:",
+      task.title
+    );
+
+  if(newTitle === null)
+    return;
+
+  newTitle =
+    newTitle.trim();
+
+  if(!newTitle)
+    return;
+
+  let newPriority =
+    prompt(
+      "Priority: high, medium, or low",
+      task.priority
+    );
+
+  if(newPriority === null)
+    return;
+
+  newPriority =
+    newPriority
+      .trim()
+      .toLowerCase();
+
+  if(
+    !["high","medium","low"]
+      .includes(newPriority)
+  ){
+
+    alert(
+      "Please enter high, medium, or low."
+    );
+
+    return;
+
+  }
+
+  task.title =
+    newTitle;
+
+  task.priority =
+    newPriority;
+
+  save();
+
+  render();
+
+}
 
  $("taskInput").value="";
 
