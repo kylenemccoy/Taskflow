@@ -990,47 +990,57 @@ function toggle(id){
 
 function add(){
 
- let t=
- parseTask(
-  $("taskInput").value
- );
+  let t =
+    parseTask(
+      $("taskInput").value
+    );
 
- if(!t)
-  return;
+  if(!t)
+    return;
 
- if(t.recurring){
+  if(t.recurring){
 
-  let day=
-   /every\s+(\w+)|each\s+(\w+)/i
-   .exec(
-    $("taskInput").value
-   );
+    let day =
+      /every\s+(\w+)|each\s+(\w+)/i
+      .exec(
+        $("taskInput").value
+      );
 
-  routines.push({
+    routines.push({
 
-   title:t.title,
+      title:t.title,
 
-   area:t.area,
+      area:t.area,
 
-   days:[
-    day?
-    (day[1]||day[2])
-     .replace(
-      /^./,
-      x=>x.toUpperCase()
-     )
-    :
-    "Monday"
-   ]
+      days:[
+        day?
+        (day[1]||day[2])
+          .replace(
+            /^./,
+            x=>x.toUpperCase()
+          )
+        :
+        "Monday"
+      ]
 
-  });
+    });
 
- }else{
+  }else{
 
-  tasks.push(t);
+    tasks.push(t);
 
- }
-  function editTask(id){
+  }
+
+  $("taskInput").value="";
+
+  save();
+
+  render();
+
+}
+
+
+function editTask(id){
 
   let task =
     tasks.find(
@@ -1091,14 +1101,6 @@ function add(){
   save();
 
   render();
-
-}
-
- $("taskInput").value="";
-
- save();
-
- render();
 
 }
 
