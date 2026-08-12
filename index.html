@@ -57,7 +57,7 @@ header{
   background:#263244;
   border-radius:12px;
   padding:4px;
-  margin-top:14px;
+  -top:14px;
   max-width:520px;
   overflow-x:auto
 }
@@ -667,7 +667,6 @@ ${t.priority.toUpperCase()}
     :
 
     "You're caught up! 🎉";
-}
 document
 .querySelectorAll("#scope button")
 .forEach(b => {
@@ -682,7 +681,6 @@ document
 
   });
 
-});
   b.addEventListener("contextmenu", e => {
 
     e.preventDefault();
@@ -724,49 +722,7 @@ document
   });
 
 });
-
-  b.oncontextmenu = e => {
-
-    e.preventDefault();
-
-    showTabMenu(
-      Number(b.dataset.scope),
-      e.clientX,
-      e.clientY
-    );
-
-  };
-
-  b.ontouchstart = e => {
-
-    pressTimer = setTimeout(() => {
-
-      const touch =
-        e.touches[0];
-
-      showTabMenu(
-        Number(b.dataset.scope),
-        touch.clientX,
-        touch.clientY
-      );
-
-    }, 600);
-
-  };
-
-  b.ontouchend = () => {
-
-    clearTimeout(pressTimer);
-
-  };
-
-  b.ontouchmove = () => {
-
-    clearTimeout(pressTimer);
-
-  };
-
-});
+}
 
 function deleteTab(index){
 
