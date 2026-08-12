@@ -696,35 +696,36 @@ ${t.priority.toUpperCase()}
 
 
 document
-  .querySelectorAll('#scope button:not([data-scope="all"])')
+  .querySelectorAll("#scope button")
     .forEach(b => {
 
-      b.addEventListener("click", function(){
+     b.addEventListener("click", function(){
 
-        scope =
-          this.dataset.scope === "all"
-            ? "all"
-            : Number(
-                this.dataset.scope
-              );
-
-        render();
-
-      });
-
-
-      b.addEventListener("contextmenu", e => {
-
-        e.preventDefault();
-
-        showTabMenu(
-          Number(b.dataset.scope),
-          e.clientX,
-          e.clientY
+  scope =
+    this.dataset.scope === "all"
+      ? "all"
+      : Number(
+          this.dataset.scope
         );
 
-      });
+  render();
 
+});
+
+  b.addEventListener("contextmenu", e => {
+
+  if(this.dataset.scope === "all")
+    return;
+
+  e.preventDefault();
+
+  showTabMenu(
+    Number(b.dataset.scope),
+    e.clientX,
+    e.clientY
+  );
+
+});
 
       b.addEventListener("touchstart", e => {
 
