@@ -52,11 +52,14 @@ header{
 
 .switch{
   display:flex;
+  align-items:center;
+  gap:4px;
   background:#263244;
   border-radius:12px;
   padding:4px;
-  margin-top:14px;
-  max-width:520px
+  -top:14px;
+  max-width:520px;
+  overflow-x:auto
 }
 
 .switch button{
@@ -73,7 +76,52 @@ header{
   background:#fff;
   color:#111827
 }
+.add-tab{
+  border:0;
+  background:#263244;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:9px;
+  margin-top:14px;
+  font-size:20px;
+  font-weight:700;
+  cursor:pointer;
+}
+.tab-menu{
+  display:none;
+  position:fixed;
+  z-index:100;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow:0 8px 30px #10182825;
+  padding:6px;
+  min-width:150px;
+}
 
+.tab-menu button{
+  display:block;
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:left;
+  padding:10px 12px;
+  border-radius:8px;
+  font-weight:650;
+  cursor:pointer;
+}
+
+.tab-menu button:hover{
+  background:#f2f4f7;
+}
+
+.add-tab:hover{
+  background:#374151;
+}
+
+.add-tab:hover{
+  background:#4b5563;
+}
 main{
   max-width:900px;
   margin:0 auto;
@@ -266,20 +314,17 @@ footer{
 AI-style capture • School + Home • routines • calendar
 </div>
 
-<div class="switch" id="scope">
+<div style="display:flex;align-items:center;gap:6px;">
+  <div class="switch" id="scope"></div>
 
-<button data-scope="all" class="active">
-ALL
-</button>
+<div id="tabMenu" class="tab-menu">
+  <button id="renameTabBtn">✏️ Rename</button>
+  <button id="deleteTabBtn">🗑️ Delete</button>
+</div>
 
-<button data-scope="school">
-🏫 SCHOOL
-</button>
-
-<button data-scope="home">
-🏠 HOME
-</button>
-
+  <button class="add-tab" id="addTabBtn">
+    ＋
+  </button>
 </div>
 
 </header>
@@ -378,8 +423,22 @@ Voice input uses your browser's speech recognition when available.
 
 const KEY="taskflow_tasks_v1";
 const ROUTE="taskflow_routines_v1";
+const TAB_KEY="taskflow_tabs_v1";
 
-let scope="all";
+let tabs=JSON.parse(
+  localStorage.getItem(TAB_KEY)||"[]"
+);
+
+let scope="";
+
+function saveTabs(){
+
+  localStorage.setItem(
+    TAB_KEY,
+    JSON.stringify(tabs)
+  );
+
+}
 
 let tasks=JSON.parse(
   localStorage.getItem(KEY)||"[]"
@@ -387,40 +446,8 @@ let tasks=JSON.parse(
 
 let routines=
 JSON.parse(
-  localStorage.getItem(ROUTE)||"null"
-) || [
-
-{
- title:"Clean bathrooms",
- area:"home",
- days:["Tuesday"]
-},
-
-{
- title:"Vacuum",
- area:"home",
- days:["Wednesday"]
-},
-
-{
- title:"Review A+ mentoring hours",
- area:"school",
- days:["Friday"]
-},
-
-{
- title:"Check attendance",
- area:"school",
- days:[
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday"
- ]
-}
-
-];
+  localStorage.getItem(ROUTE)||"[]"
+);
 
 const $=id=>
 document.getElementById(id);
@@ -441,27 +468,11 @@ function save(){
 
 function areaFromText(t){
 
- t=t.toLowerCase();
+  if(scope !== "" && tabs[scope]){
+    return tabs[scope];
+  }
 
- let school=
- /school|a\+|a\ plus|student|teacher|attendance|mentoring|canvas|infinite campus|meeting|principal|class|grade|report/.test(t);
-
- let home=
- /home|house|bathroom|laundry|grocery|dog|family|dance|mom|dad|birthday|dinner|yard/.test(t);
-
- if(school&&!home)
-  return "school";
-
- if(home&&!school)
-  return "home";
-
- if(scope==="school")
-  return "school";
-
- if(scope==="home")
-  return "home";
-
- return "home";
+  return "";
 
 }
 
@@ -552,40 +563,41 @@ function parseTask(text){
 }
 
 function render(){
+$("scope").innerHTML =
+  tabs.map((tab,index) => `
+    <button
+      data-scope="${index}"
+      data-tab="${index}"
+      class="${scope===index ? "active" : ""}"
+    >
+      ${esc(tab)}
+    </button>
+  `).join("");
 
- document
- .querySelectorAll("#scope button")
- .forEach(
-  b=>b.classList.toggle(
-   "active",
-   b.dataset.scope===scope
-  )
- );
+  let visible =
+    scope === ""
+      ? []
+      : tasks
+          .filter(t => t.area === tabs[scope])
+          .sort(
+            (a,b) =>
+              ({
+                high:0,
+                medium:1,
+                low:2
+              }[a.priority] -
+              {
+                high:0,
+                medium:1,
+                low:2
+              }[b.priority])
+          );
 
- let visible=
- tasks
- .filter(
-  t=>scope==="all"||t.area===scope
- )
- .sort(
-  (a,b)=>
-   ({
-    high:0,
-    medium:1,
-    low:2
-   }[a.priority]-
-   {
-    high:0,
-    medium:1,
-    low:2
-   }[b.priority])
- );
+  $("tasks").innerHTML =
+    visible.length ?
 
- $("tasks").innerHTML=
- visible.length?
-
- visible.map(
-  t=>`
+    visible.map(
+      t => `
 
 <div class="task ${t.done?"done":""}">
 
@@ -602,13 +614,9 @@ ${esc(t.title)}
 </div>
 
 <div class="meta">
-
-${t.area==="school"?"🏫 School":"🏠 Home"}
-
+${esc(t.area)}
 ${t.due?" • "+esc(t.due):""}
-
 ${t.recurring?" • recurring":""}
-
 </div>
 
 </div>
@@ -620,95 +628,305 @@ ${t.priority.toUpperCase()}
 </div>
 
 `
- ).join("")
+    ).join("")
 
-:
+    :
 
-'<div class="empty">No tasks here yet. Type or speak one above.</div>';
+    '<div class="empty">No tasks here yet. Type or speak one above.</div>';
 
- let today=
- [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
- ][new Date().getDay()];
+  $("routines").innerHTML =
+    '<div class="empty">Create recurring tasks from your selected tab.</div>';
 
- let rs=
- routines.filter(
-  r=>
-   (scope==="all"||r.area===scope)
-   &&
-   r.days.includes(today)
- );
+  let best =
+    visible.find(
+      t => !t.done
+    );
 
- $("routines").innerHTML=
- rs.length?
+  $("recommendation").innerHTML =
 
- rs.map(
-  r=>`
+    best ?
 
-<div class="routine">
+    `Based on priority, I’d do:
 
-<div>
+    <br><br>
 
-<b>
-${esc(r.title)}
-</b>
+    <b>
+    ${esc(best.title)}
+    </b>
 
-<div class="small">
-${r.area==="school"?"School":"Home"} • Today
-</div>
+    <br>
 
-</div>
+    <span class="small">
 
-<span>🔁</span>
+    ${best.priority.toUpperCase()}
 
-</div>
+    ${best.due?" • "+esc(best.due):""}
 
-`
- ).join("")
+    </span>`
 
-:
+    :
 
-'<div class="empty">No routine scheduled for today.</div>';
+    "You're caught up! 🎉";
+document
+.querySelectorAll("#scope button")
+.forEach(b => {
 
- let best=
- visible.find(
-  t=>!t.done
- );
+  b.addEventListener("click", function(){
 
- $("recommendation").innerHTML=
+    scope = Number(
+      this.dataset.scope
+    );
 
- best?
+    render();
 
- `Based on priority, I’d do:
+  });
 
-<br><br>
+  b.addEventListener("contextmenu", e => {
 
-<b>
-${esc(best.title)}
-</b>
+    e.preventDefault();
 
-<br>
+    showTabMenu(
+      Number(b.dataset.scope),
+      e.clientX,
+      e.clientY
+    );
 
-<span class="small">
+  });
 
-${best.priority.toUpperCase()} priority
+  b.addEventListener("touchstart", e => {
 
-${best.due?" • "+esc(best.due):""}
+    pressTimer = setTimeout(() => {
 
-</span>`
+      const touch = e.touches[0];
 
-:
+      showTabMenu(
+        Number(b.dataset.scope),
+        touch.clientX,
+        touch.clientY
+      );
 
-"You're caught up! 🎉";
+    }, 600);
+
+  });
+
+  b.addEventListener("touchend", () => {
+
+    clearTimeout(pressTimer);
+
+  });
+
+  b.addEventListener("touchmove", () => {
+
+    clearTimeout(pressTimer);
+
+  });
+
+});
+}
+
+function deleteTab(index){
+
+  let tabName = tabs[index];
+
+  if(!confirm(
+    `Delete "${tabName}"?\n\nThe tasks in this tab will also be deleted.`
+  )){
+    return;
+  }
+
+  tasks = tasks.filter(
+    t => t.area !== tabName
+  );
+
+  routines = routines.filter(
+    r => r.area !== tabName
+  );
+
+  tabs.splice(index,1);
+
+  if(tabs.length === 0){
+
+    scope = "";
+
+  }else if(scope === index){
+
+    scope = Math.min(index,tabs.length-1);
+
+  }else if(scope > index){
+
+    scope--;
+
+  }
+
+  saveTabs();
+  save();
+  render();
+
+}
+let menuTabIndex = null;
+
+function showTabMenu(index,x,y){
+
+  menuTabIndex = index;
+
+  const menu = $("tabMenu");
+
+  menu.style.left = x + "px";
+  menu.style.top = y + "px";
+  menu.style.display = "block";
 
 }
 
+function hideTabMenu(){
+
+  $("tabMenu").style.display = "none";
+
+  menuTabIndex = null;
+
+}
+
+function renameTab(){
+
+  if(menuTabIndex === null)
+    return;
+
+  let oldName =
+    tabs[menuTabIndex];
+
+  let newName =
+    prompt(
+      "Rename this tab:",
+      oldName
+    );
+
+  if(!newName)
+    return;
+
+  newName = newName.trim();
+
+  if(!newName)
+    return;
+
+  if(
+    tabs.some(
+      (t,i)=>
+        i !== menuTabIndex &&
+        t.toLowerCase() === newName.toLowerCase()
+    )
+  ){
+
+    alert("You already have a tab with that name.");
+
+    return;
+
+  }
+
+  let oldTab = tabs[menuTabIndex];
+
+  tabs[menuTabIndex] = newName;
+
+  tasks.forEach(
+    t=>{
+      if(t.area === oldTab)
+        t.area = newName;
+    }
+  );
+
+  routines.forEach(
+    r=>{
+      if(r.area === oldTab)
+        r.area = newName;
+    }
+  );
+
+  saveTabs();
+  save();
+
+  hideTabMenu();
+
+  render();
+
+}
+
+function deleteTab(){
+
+  if(menuTabIndex === null)
+    return;
+
+  let index =
+    menuTabIndex;
+
+  let tabName =
+    tabs[index];
+
+  let confirmed =
+    confirm(
+      `Delete "${tabName}"?\n\nTasks in this tab will also be deleted.`
+    );
+
+  if(!confirmed)
+    return;
+
+  tasks =
+    tasks.filter(
+      t=>t.area !== tabName
+    );
+
+  routines =
+    routines.filter(
+      r=>r.area !== tabName
+    );
+
+  tabs.splice(index,1);
+
+  if(tabs.length === 0){
+
+    scope = "";
+
+  }else if(scope === index){
+
+    scope =
+      Math.min(
+        index,
+        tabs.length-1
+      );
+
+  }else if(scope > index){
+
+    scope--;
+
+  }
+
+  saveTabs();
+  save();
+
+  hideTabMenu();
+
+  render();
+
+}
+
+$("renameTabBtn").onclick =
+  renameTab;
+
+$("deleteTabBtn").onclick =
+  deleteTab;
+
+document.addEventListener(
+  "click",
+  e=>{
+
+    if(
+      !e.target.closest(".tab-menu") &&
+      !e.target.closest("#scope button")
+    ){
+
+      hideTabMenu();
+
+    }
+
+  }
+);
 function toggle(id){
 
  let t=
@@ -792,6 +1010,64 @@ function esc(s){
 }
 
 $("addBtn").onclick=add;
+  $("addTabBtn").onclick=()=>{
+
+  if(tabs.length>=5){
+
+    alert("You can have up to 5 tabs.");
+
+    return;
+
+  }
+
+  let name=
+    prompt(
+      "What would you like to name this tab?"
+    );
+
+  if(!name)
+    return;
+
+  name=name.trim();
+
+  if(!name)
+    return;
+
+  tabs.push(name);
+
+  scope=tabs.length-1;
+
+  saveTabs();
+
+  render();
+
+};
+  $("addTabBtn").onclick=()=>{
+
+  if(tabs.length>=5){
+    alert("You can have up to 5 tabs.");
+    return;
+  }
+
+  let name=prompt("What would you like to name this tab?");
+
+  if(!name)
+    return;
+
+  name=name.trim();
+
+  if(!name)
+    return;
+
+  tabs.push(name);
+
+  scope=tabs.length-1;
+
+  saveTabs();
+
+  render();
+
+};
 
 $("taskInput")
 .addEventListener(
@@ -799,16 +1075,6 @@ $("taskInput")
  e=>{
   if(e.key==="Enter")
    add();
- }
-);
-
-document
-.querySelectorAll("#scope button")
-.forEach(
- b=>
- b.onclick=()=>{
-  scope=b.dataset.scope;
-  render();
  }
 );
 
