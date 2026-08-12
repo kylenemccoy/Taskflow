@@ -1050,43 +1050,59 @@ function editTask(id){
   if(!task)
     return;
 
-  $("editTaskTitle").value =
-    task.title;
+  let newTitle =
+    prompt(
+      "Edit task:",
+      task.title
+    );
 
-  $("editTaskPriority").value =
-    task.priority;
+  if(newTitle === null)
+    return;
 
-  $("editTaskDialog").showModal();
+  newTitle =
+    newTitle.trim();
 
-  $("editTaskForm").onsubmit =
-    function(event){
+  if(!newTitle)
+    return;
 
-      event.preventDefault();
+  let newPriority =
+    prompt(
+      "Priority: high, medium, or low",
+      task.priority
+    );
 
-      task.title =
-        $("editTaskTitle")
-          .value
-          .trim();
+  if(newPriority === null)
+    return;
 
-      task.priority =
-        $("editTaskPriority")
-          .value;
+  newPriority =
+    newPriority
+      .trim()
+      .toLowerCase();
 
-      save();
+  if(
+    !["high","medium","low"]
+      .includes(newPriority)
+  ){
 
-      $("editTaskDialog").close();
+    alert(
+      "Please enter high, medium, or low."
+    );
 
-      render();
+    return;
 
-    };
+  }
+
+  task.title =
+    newTitle;
+
+  task.priority =
+    newPriority;
+
+  save();
+
+  render();
 
 }
-  $("cancelEditTask").onclick =
-  function(){
-
-    $("editTaskDialog").close();
-
-  };
 function esc(s){
 
  return String(s).replace(
