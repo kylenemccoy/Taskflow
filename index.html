@@ -883,66 +883,116 @@ let best =
 
 let recommendationHTML = "";
 
-if(best){
+let otherTasks =
+  recommendationTasks
+    .filter(
+      t => !best || t.id !== best.id
+    );
+
+if(best || todayRoutines.length){
 
   recommendationHTML += `
 
     <div>
 
-      <b>Start with:</b>
+      ${
+        nextEvent
+          ? `
+            <div class="small">
+              ⏰ You have
+              ${
+                nextEvent.minutesUntil < 60
+                  ? `${nextEvent.minutesUntil} minutes`
+                  : `${Math.floor(nextEvent.minutesUntil / 60)} hr${
+                      nextEvent.minutesUntil % 60
+                        ? " " + (nextEvent.minutesUntil % 60) + " min"
+                        : ""
+                    }`
+              }
+              before your
+              ${esc(nextEvent.time)}
+              ${esc(nextEvent.title)}.
+            </div>
+
+            <br>
+          `
+          : ""
+      }
+
+      <b>🔴 Do this first</b>
 
       <br><br>
 
-      🔴
-      <b>${esc(best.title)}</b>
-
-      <div class="small">
-
-        ${best.priority.toUpperCase()}
-
-        ${
-          best.due
-            ? " • " + esc(best.due)
-            : ""
-        }
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-if(todayRoutines.length){
-
-  recommendationHTML += `
-
-    <br>
-
-    <div>
-
-      <b>Weekly today:</b>
-
-      ${todayRoutines
-        .map(
-          r => `
+      ${
+        best
+          ? `
+            <b>${esc(best.title)}</b>
 
             <div class="small">
-
-              • ${esc(r.title)}
-
+              ${best.priority.toUpperCase()}
               ${
-                scope === "all"
-                  ? " • " + esc(r.area)
+                best.due
+                  ? " • " + esc(best.due)
                   : ""
               }
-
             </div>
+          `
+          : todayRoutines.length
+            ? `
+              <b>${esc(todayRoutines[0].title)}</b>
+
+              <div class="small">
+                Weekly today
+              </div>
+            `
+            : ""
+      }
+
+      ${
+        otherTasks.length || todayRoutines.length > (best ? 0 : 1)
+          ? `
+
+            <br>
+
+            <b>You could also complete:</b>
+
+            ${
+              otherTasks
+                .slice(0,3)
+                .map(
+                  t => `
+
+                    <div class="small">
+                      • ${esc(t.title)}
+                    </div>
+
+                  `
+                )
+                .join("")
+            }
+
+            ${
+              todayRoutines
+                .slice(best ? 0 : 1,3)
+                .map(
+                  r => `
+
+                    <div class="small">
+                      • ${esc(r.title)}
+                      ${
+                        scope === "all"
+                          ? " • " + esc(r.area)
+                          : ""
+                      }
+                    </div>
+
+                  `
+                )
+                .join("")
+            }
 
           `
-        )
-        .join("")
+          : ""
       }
 
     </div>
@@ -952,30 +1002,6 @@ if(todayRoutines.length){
 }
 
 if(nextEvent){
-
-  let timeText;
-
-  if(nextEvent.minutesUntil < 60){
-
-    timeText =
-      `${nextEvent.minutesUntil} minutes`;
-
-  }else{
-
-    let hours =
-      Math.floor(
-        nextEvent.minutesUntil / 60
-      );
-
-    let minutes =
-      nextEvent.minutesUntil % 60;
-
-    timeText =
-      minutes
-        ? `${hours} hr ${minutes} min`
-        : `${hours} hr`;
-
-  }
 
   recommendationHTML += `
 
@@ -992,9 +1018,16 @@ if(nextEvent){
       ${esc(nextEvent.title)}
 
       <div class="small">
-
-        ${timeText} away
-
+        ${
+          nextEvent.minutesUntil < 60
+            ? `${nextEvent.minutesUntil} minutes`
+            : `${Math.floor(nextEvent.minutesUntil / 60)} hr${
+                nextEvent.minutesUntil % 60
+                  ? " " + (nextEvent.minutesUntil % 60) + " min"
+                  : ""
+              }`
+        }
+        away
       </div>
 
     </div>
