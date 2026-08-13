@@ -656,9 +656,15 @@ ${esc(t.title)}
 </div>
 
 <div class="meta">
+
 ${esc(t.area)}
+
 ${t.due?" • "+esc(t.due):""}
+
 ${t.recurring?" • recurring":""}
+
+${t.duration ? " • " + t.duration + " min" : ""}
+
 </div>
 
 </div>
@@ -1430,12 +1436,37 @@ function editTask(id){
     return;
 
   }
+let newDuration =
+  prompt(
+    "Estimated time in minutes:",
+    task.duration || 30
+  );
 
+if(newDuration === null)
+  return;
+
+newDuration =
+  Number(newDuration);
+
+if(
+  !Number.isFinite(newDuration) ||
+  newDuration <= 0
+){
+
+  alert(
+    "Please enter a valid number of minutes."
+  );
+
+  return;
+
+}
   task.title =
     newTitle;
 
   task.priority =
     newPriority;
+  task.duration =
+  newDuration;
 
   save();
 
