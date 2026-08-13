@@ -890,13 +890,41 @@ let best =
 
 let recommendationHTML = "";
 
+let availableMinutes =
+  nextEvent
+    ? Math.max(
+        0,
+        nextEvent.minutesUntil
+      )
+    : Infinity;
+
+let firstTask =
+  recommendationTasks
+    .find(
+      t =>
+        (t.duration || 30) <=
+        availableMinutes
+    );
+
 let otherTasks =
   recommendationTasks
     .filter(
-      t => !best || t.id !== best.id
+      t =>
+        !firstTask ||
+        t.id !== firstTask.id
+    )
+    .filter(
+      t =>
+        (t.duration || 30) <=
+        availableMinutes
     );
 
-if(best || todayRoutines.length){
+let firstRoutine =
+  todayRoutines.length
+    ? todayRoutines[0]
+    : null;
+
+if(firstTask || firstRoutine){
 
   recommendationHTML += `
 
@@ -906,19 +934,23 @@ if(best || todayRoutines.length){
         nextEvent
           ? `
             <div class="small">
+
               ⏰ You have
               ${
                 nextEvent.minutesUntil < 60
                   ? `${nextEvent.minutesUntil} minutes`
                   : `${Math.floor(nextEvent.minutesUntil / 60)} hr${
                       nextEvent.minutesUntil % 60
-                        ? " " + (nextEvent.minutesUntil % 60) + " min"
+                        ? " " +
+                          (nextEvent.minutesUntil % 60) +
+                          " min"
                         : ""
                     }`
               }
               before your
               ${esc(nextEvent.time)}
               ${esc(nextEvent.title)}.
+
             </div>
 
             <br>
@@ -931,37 +963,52 @@ if(best || todayRoutines.length){
       <br><br>
 
       ${
-        best
+        firstTask
           ? `
-            <b>${esc(best.title)}</b>
+
+            <b>
+              ${esc(firstTask.title)}
+            </b>
 
             <div class="small">
-              ${best.priority.toUpperCase()}
+
+              ${firstTask.priority.toUpperCase()}
+
+              •
+              ${firstTask.duration || 30} min
+
               ${
-                best.due
-                  ? " • " + esc(best.due)
+                firstTask.due
+                  ? " • " + esc(firstTask.due)
                   : ""
               }
-            </div>
-          `
-          : todayRoutines.length
-            ? `
-              <b>${esc(todayRoutines[0].title)}</b>
 
-              <div class="small">
-                Weekly today
-              </div>
-            `
-            : ""
+            </div>
+
+          `
+          : `
+
+            <b>
+              ${esc(firstRoutine.title)}
+            </b>
+
+            <div class="small">
+              Weekly today
+            </div>
+
+          `
       }
 
       ${
-        otherTasks.length || todayRoutines.length > (best ? 0 : 1)
+        otherTasks.length ||
+        todayRoutines.length > 1
           ? `
 
             <br>
 
-            <b>You could also complete:</b>
+            <b>
+              You could also complete:
+            </b>
 
             ${
               otherTasks
@@ -970,7 +1017,11 @@ if(best || todayRoutines.length){
                   t => `
 
                     <div class="small">
+
                       • ${esc(t.title)}
+
+                      • ${t.duration || 30} min
+
                     </div>
 
                   `
@@ -980,17 +1031,21 @@ if(best || todayRoutines.length){
 
             ${
               todayRoutines
-                .slice(best ? 0 : 1,3)
+                .slice(1,3)
                 .map(
                   r => `
 
                     <div class="small">
+
                       • ${esc(r.title)}
+
                       ${
                         scope === "all"
-                          ? " • " + esc(r.area)
+                          ? " • " +
+                            esc(r.area)
                           : ""
                       }
+
                     </div>
 
                   `
@@ -1010,13 +1065,28 @@ if(best || todayRoutines.length){
 
 if(nextEvent){
 
+  let timeText =
+    nextEvent.minutesUntil < 60
+      ? `${nextEvent.minutesUntil} minutes`
+      : `${Math.floor(
+          nextEvent.minutesUntil / 60
+        )} hr${
+          nextEvent.minutesUntil % 60
+            ? " " +
+              (nextEvent.minutesUntil % 60) +
+              " min"
+            : ""
+        }`;
+
   recommendationHTML += `
 
     <br>
 
     <div>
 
-      <b>📅 Next calendar event:</b>
+      <b>
+        📅 Next calendar event:
+      </b>
 
       <br><br>
 
@@ -1025,16 +1095,9 @@ if(nextEvent){
       ${esc(nextEvent.title)}
 
       <div class="small">
-        ${
-          nextEvent.minutesUntil < 60
-            ? `${nextEvent.minutesUntil} minutes`
-            : `${Math.floor(nextEvent.minutesUntil / 60)} hr${
-                nextEvent.minutesUntil % 60
-                  ? " " + (nextEvent.minutesUntil % 60) + " min"
-                  : ""
-              }`
-        }
-        away
+
+        ${timeText} away
+
       </div>
 
     </div>
