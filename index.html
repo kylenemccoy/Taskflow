@@ -431,17 +431,21 @@ let calendarEvents =
     localStorage.getItem(CALENDAR_KEY) || "null"
   ) || [
 
-    {
-      title:"Staff Meeting",
-      time:"10:00 AM",
-      area:"School"
-    },
+   {
+  title:"Staff Meeting",
+  time:"10:00 AM",
+  hour:10,
+  minute:0,
+  area:"School"
+},
 
-    {
-      title:"Family / Personal",
-      time:"4:00 PM",
-      area:"Home"
-    }
+{
+  title:"Family / Personal",
+  time:"4:00 PM",
+  hour:16,
+  minute:0,
+  area:"Home"
+}
 
   ];
 let tabs=JSON.parse(
