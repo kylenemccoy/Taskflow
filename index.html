@@ -790,7 +790,29 @@ $("routines").innerHTML =
   routineHTML ||
   '<div class="empty">No weekly routines yet.</div>';
 
+function minutesUntilEvent(event){
 
+  let now =
+    new Date();
+
+  let eventTime =
+    new Date();
+
+  eventTime.setHours(
+    event.hour,
+    event.minute,
+    0,
+    0
+  );
+
+  let minutes =
+    Math.round(
+      (eventTime - now) / 60000
+    );
+
+  return minutes;
+
+}
 let todayName =
   new Date().toLocaleDateString(
     "en-US",
