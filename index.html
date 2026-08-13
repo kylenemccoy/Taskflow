@@ -751,33 +751,115 @@ $("routines").innerHTML =
   '<div class="empty">No weekly routines yet.</div>';
 
 
-  let best =
-    visible.find(
-      t => !t.done
-    );
+let todayName =
+  new Date().toLocaleDateString(
+    "en-US",
+    {
+      weekday: "long"
+    }
+  );
 
+let todayRoutines =
+  routines.filter(
+    r =>
 
-  $("recommendation").innerHTML =
+      r.days &&
 
-    best ?
+      r.days.some(
+        d =>
+          String(d).toLowerCase() ===
+          todayName.toLowerCase()
+      ) &&
 
-    `Based on priority, I’d do:
+      (
+        scope === "all" ||
+        scope === "" ||
+        String(r.area).toLowerCase() ===
+        String(tabs[scope]).toLowerCase()
+      )
+  );
 
-    <br><br>
+let recommendationTasks =
+  visible.filter(
+    t => !t.done
+  );
 
-    <b>
-    ${esc(best.title)}
-    </b>
+let best =
+  recommendationTasks.length
+    ? recommendationTasks[0]
+    : null;
 
-    <br>
+$("recommendation").innerHTML =
 
-    <span class="small">
+  best || todayRoutines.length
 
-    ${best.priority.toUpperCase()}
+    ? `
 
-    ${best.due?" • "+esc(best.due):""}
+      <div>
 
-    </span>`
+        <b>Based on your day, I’d start with:</b>
+
+        <br><br>
+
+        ${
+          best
+            ? `
+              <div>
+                🔴
+                <b>${esc(best.title)}</b>
+
+                <div class="small">
+                  ${best.priority.toUpperCase()}
+                  ${best.due
+                    ? " • " + esc(best.due)
+                    : ""
+                  }
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          todayRoutines.length
+            ? `
+
+              <br>
+
+              <div>
+                <b>Weekly today:</b>
+
+                ${todayRoutines
+                  .map(
+                    r => `
+
+                      <div class="small">
+
+                        • ${esc(r.title)}
+
+                        ${
+                          scope === "all"
+                            ? " • " +
+                              esc(r.area)
+                            : ""
+                        }
+
+                      </div>
+
+                    `
+                  )
+                  .join("")
+                }
+
+              </div>
+
+            `
+            : ""
+        }
+
+      </div>
+
+    `
 
     :
 
