@@ -424,7 +424,26 @@ Voice input uses your browser's speech recognition when available.
 const KEY="taskflow_tasks_v1";
 const ROUTE="taskflow_routines_v1";
 const TAB_KEY="taskflow_tabs_v1";
+const CALENDAR_KEY="taskflow_calendar_v1";
 
+let calendarEvents =
+  JSON.parse(
+    localStorage.getItem(CALENDAR_KEY) || "null"
+  ) || [
+
+    {
+      title:"Staff Meeting",
+      time:"10:00 AM",
+      area:"School"
+    },
+
+    {
+      title:"Family / Personal",
+      time:"4:00 PM",
+      area:"Home"
+    }
+
+  ];
 let tabs=JSON.parse(
   localStorage.getItem(TAB_KEY)||"[]"
 );
@@ -465,7 +484,24 @@ function save(){
  );
 
 }
+function save(){
 
+ localStorage.setItem(
+  KEY,
+  JSON.stringify(tasks)
+ );
+
+ localStorage.setItem(
+  ROUTE,
+  JSON.stringify(routines)
+ );
+
+ localStorage.setItem(
+  CALENDAR_KEY,
+  JSON.stringify(calendarEvents)
+ );
+
+}
 function areaFromText(t){
 
   if(scope !== "" && tabs[scope]){
