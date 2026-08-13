@@ -718,23 +718,21 @@ dayOrder.forEach(
           .map(
             r => `
 
-              <div class="routine">
+           <div class="routine">
 
-                <b>
-                  ${esc(r.title)}
-                </b>
+  ${esc(r.title)}
 
-                ${
-                  scope === "all"
-                    ? `
-                      <div class="small">
-                        ${esc(r.area)}
-                      </div>
-                    `
-                    : ""
-                }
+  ${
+    scope === "all"
+      ? `
+        <div class="small">
+          ${esc(r.area)}
+        </div>
+      `
+      : ""
+  }
 
-              </div>
+</div>
 
             `
           )
