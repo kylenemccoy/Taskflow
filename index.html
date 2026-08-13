@@ -560,7 +560,7 @@ function parseTask(text){
  )
  .trim();
 
- return {
+return {
 
   title:title.replace(/[.!?]+$/,""),
 
@@ -572,12 +572,13 @@ function parseTask(text){
 
   recurring:!!recurring,
 
+  duration:30,
+
   done:false,
 
   id:Date.now()
 
- };
-
+};
 }
 
 function render(){
