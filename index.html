@@ -767,7 +767,37 @@ dayOrder.forEach(
 $("routines").innerHTML =
   routineHTML ||
   '<div class="empty">No weekly routines yet.</div>';
+$("routines").innerHTML =
+  routineHTML ||
+  '<div class="empty">No weekly routines yet.</div>';
 
+
+$("calendarEvents").innerHTML =
+  calendarEvents.length
+
+    ? calendarEvents
+        .map(
+          event => `
+
+            <div class="calendar">
+
+              <b>
+                ${esc(event.time)} • ${esc(event.title)}
+              </b>
+
+              <div class="small">
+                ${esc(event.area)}
+              </div>
+
+            </div>
+
+          `
+        )
+        .join("")
+
+    :
+
+    '<div class="empty">No calendar events yet.</div>';
 function minutesUntilEvent(event){
 
   let now =
