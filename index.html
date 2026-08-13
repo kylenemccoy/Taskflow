@@ -666,8 +666,43 @@ ${t.priority.toUpperCase()}
     '<div class="empty">No tasks here yet. Type or speak one above.</div>';
 
 
-  $("routines").innerHTML =
-    '<div class="empty">Create recurring tasks from your selected tab.</div>';
+let visibleRoutines =
+  scope === "all"
+    ? routines
+    : scope === ""
+      ? []
+      : routines.filter(
+          r => r.area === tabs[scope]
+        );
+
+$("routines").innerHTML =
+  visibleRoutines.length
+
+    ? visibleRoutines
+        .map(
+          r => `
+
+            <div class="routine">
+
+              <b>
+                ${esc(r.title)}
+              </b>
+
+              <div class="small">
+                ${esc(r.area)}
+                •
+                ${r.days.join(", ")}
+              </div>
+
+            </div>
+
+          `
+        )
+        .join("")
+
+    :
+
+    '<div class="empty">No weekly routines yet.</div>';
 
 
   let best =
