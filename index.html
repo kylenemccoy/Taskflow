@@ -820,7 +820,29 @@ let todayName =
       weekday: "long"
     }
   );
+let upcomingEvents =
+  calendarEvents
+    .map(
+      event => ({
+        ...event,
+        minutesUntil:
+          minutesUntilEvent(event)
+      })
+    )
+    .filter(
+      event =>
+        event.minutesUntil >= 0
+    )
+    .sort(
+      (a,b) =>
+        a.minutesUntil -
+        b.minutesUntil
+    );
 
+let nextEvent =
+  upcomingEvents.length
+    ? upcomingEvents[0]
+    : null;
 let todayRoutines =
   routines.filter(
     r =>
