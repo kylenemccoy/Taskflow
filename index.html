@@ -677,34 +677,80 @@ let visibleRoutines =
             String(tabs[scope]).toLowerCase()
         );
 
-$("routines").innerHTML =
-  visibleRoutines.length
+const dayOrder = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday"
+];
 
-    ? visibleRoutines
-        .map(
-          r => `
+let routineHTML = "";
 
-            <div class="routine">
+dayOrder.forEach(
+  day => {
 
-              <b>
-                ${esc(r.title)}
-              </b>
+    let dayRoutines =
+      visibleRoutines.filter(
+        r =>
+          r.days &&
+          r.days.some(
+            d =>
+              String(d).toLowerCase() ===
+              day.toLowerCase()
+          )
+      );
 
-              <div class="small">
-                ${esc(r.area)}
-                •
-                ${r.days.join(", ")}
+    if(!dayRoutines.length)
+      return;
+
+    routineHTML += `
+
+      <div class="routine-day">
+
+        <div class="routine-day-title">
+          ${day}
+        </div>
+
+        ${dayRoutines
+          .map(
+            r => `
+
+              <div class="routine">
+
+                <b>
+                  ${esc(r.title)}
+                </b>
+
+                ${
+                  scope === "all"
+                    ? `
+                      <div class="small">
+                        ${esc(r.area)}
+                      </div>
+                    `
+                    : ""
+                }
+
               </div>
 
-            </div>
+            `
+          )
+          .join("")
+        }
 
-          `
-        )
-        .join("")
+      </div>
 
-    :
+    `;
 
-    '<div class="empty">No weekly routines yet.</div>';
+  }
+);
+
+$("routines").innerHTML =
+  routineHTML ||
+  '<div class="empty">No weekly routines yet.</div>';
 
 
   let best =
