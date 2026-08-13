@@ -924,6 +924,26 @@ let firstRoutine =
     ? todayRoutines[0]
     : null;
 
+let plannedMinutes = 0;
+
+if(firstTask){
+
+  plannedMinutes +=
+    firstTask.duration || 30;
+
+}
+
+otherTasks
+  .slice(0,3)
+  .forEach(
+    t => {
+
+      plannedMinutes +=
+        t.duration || 30;
+
+    }
+  );
+
 if(firstTask || firstRoutine){
 
   recommendationHTML += `
@@ -933,13 +953,17 @@ if(firstTask || firstRoutine){
       ${
         nextEvent
           ? `
+
             <div class="small">
 
               ⏰ You have
+
               ${
                 nextEvent.minutesUntil < 60
                   ? `${nextEvent.minutesUntil} minutes`
-                  : `${Math.floor(nextEvent.minutesUntil / 60)} hr${
+                  : `${Math.floor(
+                      nextEvent.minutesUntil / 60
+                    )} hr${
                       nextEvent.minutesUntil % 60
                         ? " " +
                           (nextEvent.minutesUntil % 60) +
@@ -947,13 +971,17 @@ if(firstTask || firstRoutine){
                         : ""
                     }`
               }
+
               before your
+
               ${esc(nextEvent.time)}
+
               ${esc(nextEvent.title)}.
 
             </div>
 
             <br>
+
           `
           : ""
       }
@@ -979,7 +1007,8 @@ if(firstTask || firstRoutine){
 
               ${
                 firstTask.due
-                  ? " • " + esc(firstTask.due)
+                  ? " • " +
+                    esc(firstTask.due)
                   : ""
               }
 
@@ -1020,7 +1049,9 @@ if(firstTask || firstRoutine){
 
                       • ${esc(t.title)}
 
-                      • ${t.duration || 30} min
+                      •
+                      ${t.duration || 30}
+                      min
 
                     </div>
 
@@ -1057,6 +1088,27 @@ if(firstTask || firstRoutine){
           : ""
       }
 
+      ${
+        nextEvent
+          ? `
+
+            <br>
+
+            <div class="small">
+
+              <b>
+                ${plannedMinutes}
+                of
+                ${availableMinutes}
+                minutes planned
+              </b>
+
+            </div>
+
+          `
+          : ""
+      }
+
     </div>
 
   `;
@@ -1067,7 +1119,9 @@ if(nextEvent){
 
   let timeText =
     nextEvent.minutesUntil < 60
+
       ? `${nextEvent.minutesUntil} minutes`
+
       : `${Math.floor(
           nextEvent.minutesUntil / 60
         )} hr${
